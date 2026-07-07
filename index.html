@@ -445,6 +445,40 @@
     transform: translateX(22px);
   }
 
+  .install-banner {
+    position: fixed;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(to bottom, #fff 0%, #f0f0f0 100%);
+    border: 1px solid #bbb;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.9);
+    padding: 12px 18px;
+    text-align: center;
+    max-width: 300px;
+    width: 90%;
+    z-index: 50;
+  }
+
+  .install-banner p {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #333;
+    line-height: 1.5;
+    margin: 0;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+  }
+
+  .install-banner .share-icon {
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  @media (display-mode: standalone) {
+    .install-banner { display: none; }
+  }
+
   .footer {
     position: fixed;
     bottom: 12px;
@@ -533,6 +567,10 @@
       </div>
     </div>
 
+  </div>
+
+  <div class="install-banner" id="installBanner">
+    <p>Tap <svg class="share-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> then "Add to Home Screen"</p>
   </div>
 
   <p class="footer">Designed in Silver Lake</p>
