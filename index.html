@@ -445,21 +445,6 @@
     transform: translateX(22px);
   }
 
-  .status {
-    font-size: 0.7rem;
-    color: #fff;
-    text-align: center;
-    line-height: 1.6;
-    font-weight: 600;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
-    background: rgba(0,0,0,0.45);
-    padding: 8px 20px;
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.1);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-  }
-
   .footer {
     position: fixed;
     bottom: 12px;
@@ -510,6 +495,20 @@
         <span class="toggle-slider"></span>
       </label>
     </div>
+    <div class="setting-row">
+      <span class="setting-label">Snapchat</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggleSnapchat" checked>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label">Grindr</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggleGrindr" checked>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
   </div>
 
   <div class="page" id="page-blow">
@@ -527,7 +526,6 @@
       </div>
     </div>
 
-    <p class="status" id="status">tap to start blowing up your phone</p>
   </div>
 
   <p class="footer">Designed in Silver Lake</p>
@@ -535,12 +533,13 @@
 <script>
 const btn = document.getElementById('blow');
 const counterEl = document.getElementById('counter');
-const statusEl = document.getElementById('status');
 const settingsBtn = document.getElementById('settingsBtn');
 const settingsPanel = document.getElementById('settingsPanel');
 const toggleNotif = document.getElementById('toggleNotif');
 const toggleTwitter = document.getElementById('toggleTwitter');
 const toggleApplePay = document.getElementById('toggleApplePay');
+const toggleSnapchat = document.getElementById('toggleSnapchat');
+const toggleGrindr = document.getElementById('toggleGrindr');
 
 let blowing = false;
 let interval = null;
@@ -548,14 +547,17 @@ let count = 0;
 let audioCtx = null;
 let startTime = 0;
 
-settingsBtn.addEventListener('click', () => {
+settingsBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
   settingsPanel.classList.toggle('open');
 });
 
-document.addEventListener('click', (e) => {
-  if (!settingsPanel.contains(e.target) && e.target !== settingsBtn) {
-    settingsPanel.classList.remove('open');
-  }
+settingsPanel.addEventListener('click', (e) => {
+  e.stopPropagation();
+});
+
+document.addEventListener('click', () => {
+  settingsPanel.classList.remove('open');
 });
 
 function ensureAudio() {
@@ -569,6 +571,10 @@ const applePayAudio = new Audio('applepay.mp3');
 applePayAudio.preload = 'auto';
 const twitterAudio = new Audio('twitter.mp3');
 twitterAudio.preload = 'auto';
+const snapchatAudio = new Audio('snapchat.mp3');
+snapchatAudio.preload = 'auto';
+const grindrAudio = new Audio('grindr.mp3');
+grindrAudio.preload = 'auto';
 
 function playNotification() {
   const clone = notifAudio.cloneNode();
@@ -588,11 +594,25 @@ function playTwitter() {
   clone.play().catch(() => {});
 }
 
+function playSnapchat() {
+  const clone = snapchatAudio.cloneNode();
+  clone.volume = 0.8;
+  clone.play().catch(() => {});
+}
+
+function playGrindr() {
+  const clone = grindrAudio.cloneNode();
+  clone.volume = 0.8;
+  clone.play().catch(() => {});
+}
+
 function playRandomSound() {
   const available = [];
-  if (toggleNotif.checked) available.push({ fn: playNotification, weight: 75 });
+  if (toggleNotif.checked) available.push({ fn: playNotification, weight: 50 });
   if (toggleTwitter.checked) available.push({ fn: playTwitter, weight: 15 });
   if (toggleApplePay.checked) available.push({ fn: playApplePay, weight: 10 });
+  if (toggleSnapchat.checked) available.push({ fn: playSnapchat, weight: 15 });
+  if (toggleGrindr.checked) available.push({ fn: playGrindr, weight: 10 });
   if (available.length === 0) return;
   const total = available.reduce((s, a) => s + a.weight, 0);
   let r = Math.random() * total;
@@ -685,7 +705,6 @@ function startBlowing() {
   btn.classList.add('on');
   btn.firstChild.textContent = 'STOP\nBLOWING';
   counterEl.classList.add('active');
-  statusEl.textContent = 'blowing up...';
   startTime = Date.now();
   fireOne();
   scheduleNext();
@@ -696,7 +715,6 @@ function stopBlowing() {
   btn.classList.remove('on');
   btn.firstChild.textContent = 'BLOW';
   counterEl.classList.remove('active');
-  statusEl.textContent = count + ' notifications. tap to go again';
   clearTimeout(interval);
   interval = null;
 }

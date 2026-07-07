@@ -1,10 +1,12 @@
-const CACHE = 'textblower-v1';
+const CACHE = 'textblower-v2';
 const ASSETS = [
   '/',
   '/index.html',
   '/notification.mp3',
   '/applepay.mp3',
   '/twitter.mp3',
+  '/snapchat.mp3',
+  '/grindr.mp3',
   '/diamondplate.svg',
   '/icon-192.png',
   '/icon-512.png'
