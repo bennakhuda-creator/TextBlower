@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>TextBlower</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#b0b0b0">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color: #000;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    -webkit-user-select: none;
+    user-select: none;
+    background-color: #b0b0b0;
+    background-image: url('diamondplate.svg');
+    background-size: 80px 80px;
+  }
+
+  .page {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+  }
+
+  /* --- SPEECH BUBBLE LOGO --- */
+  .logo-bubble {
+    position: relative;
+    background: linear-gradient(to bottom, #fff 0%, #f0f0f0 100%);
+    border-radius: 18px;
+    padding: 18px 36px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.9);
+    border: 1px solid #bbb;
+  }
+
+  /* speech bubble tail */
+  .logo-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -18px;
+    left: 30px;
+    width: 0;
+    height: 0;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-top: 20px solid #eee;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.15));
+  }
+
+  .logo-bubble::before {
+    content: '';
+    position: absolute;
+    bottom: -16px;
+    left: 31px;
+    width: 0;
+    height: 0;
+    border-left: 11px solid transparent;
+    border-right: 11px solid transparent;
+    border-top: 18px solid #bbb;
+    z-index: -1;
+  }
+
+  .logo {
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: #6d6d72;
+    text-shadow: 0 1px 1px rgba(255,255,255,0.8), 0 -1px 0 rgba(0,0,0,0.08);
+    letter-spacing: -1px;
+    position: relative;
+    display: inline-block;
+    animation: glitch 4s infinite;
+  }
+
+  .logo::before,
+  .logo::after {
+    content: 'TextBlower';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .logo::before {
+    color: #ff3b30;
+    animation: glitch-r 4s infinite;
+    clip-path: inset(0 0 65% 0);
+  }
+
+  .logo::after {
+    color: #5ac8fa;
+    animation: glitch-b 4s infinite;
+    clip-path: inset(60% 0 0 0);
+  }
+
+  @keyframes glitch {
+    0%, 93%, 100% { transform: translate(0); }
+    94% { transform: translate(-3px, 1px) skewX(-1deg); }
+    95% { transform: translate(3px, -2px); }
+    96% { transform: translate(-1px, 2px) skewX(2deg); }
+    97% { transform: translate(0); }
+    98% { transform: translate(2px, -1px) skewX(-2deg); }
+    99% { transform: translate(-2px, 1px); }
+  }
+
+  @keyframes glitch-r {
+    0%, 93%, 100% { transform: translate(0); opacity: 0; }
+    94% { transform: translate(4px, -2px); opacity: 0.8; }
+    95% { transform: translate(-3px, 1px); opacity: 0.6; }
+    96% { transform: translate(2px, 2px); opacity: 0.9; }
+    97%,100% { transform: translate(0); opacity: 0; }
+    98% { transform: translate(-4px, -1px); opacity: 0.7; }
+  }
+
+  @keyframes glitch-b {
+    0%, 93%, 100% { transform: translate(0); opacity: 0; }
+    94% { transform: translate(-4px, 2px); opacity: 0.7; }
+    95% { transform: translate(3px, -1px); opacity: 0.8; }
+    96% { transform: translate(-2px, -2px); opacity: 0.6; }
+    97%,100% { transform: translate(0); opacity: 0; }
+    98% { transform: translate(3px, 2px); opacity: 0.8; }
+  }
+
+  /* --- NOTIFICATION BADGE COUNTER --- */
+  .counter {
+    display: inline-block;
+    min-width: 44px;
+    padding: 4px 14px;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #666;
+    font-variant-numeric: tabular-nums;
+    transition: all 0.3s;
+    text-align: center;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+  }
+
+  .counter.active {
+    color: #fff;
+    font-size: 1.5rem;
+    padding: 6px 16px;
+    background: linear-gradient(to bottom, #ff6b6b 0%, #ff3b30 50%, #d42215 50%, #c41e13 100%);
+    border: 2px solid #a01a10;
+    border-radius: 22px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.3);
+    text-shadow: 0 -1px 0 rgba(0,0,0,0.3);
+  }
+
+  /* --- HAZARD BUTTON ASSEMBLY --- */
+  .button-assembly {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* yellow hazard base with black stripes */
+  .hazard-base {
+    width: 220px;
+    height: 220px;
+    border-radius: 12px;
+    background: repeating-linear-gradient(
+      -45deg,
+      #f5c800,
+      #f5c800 14px,
+      #1a1a1a 14px,
+      #1a1a1a 28px
+    );
+    box-shadow:
+      0 8px 20px rgba(0,0,0,0.5),
+      inset 0 2px 3px rgba(255,255,255,0.3),
+      inset 0 -2px 3px rgba(0,0,0,0.3);
+    border: 3px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* metal mounting plate */
+  .metal-plate {
+    width: 160px;
+    height: 160px;
+    border-radius: 6px;
+    background: linear-gradient(to bottom,
+      #e0e0e0 0%, #ccc 10%, #b8b8b8 30%,
+      #a8a8a8 50%, #b0b0b0 70%, #c0c0c0 90%, #d0d0d0 100%);
+    border: 2px solid #888;
+    box-shadow:
+      0 2px 6px rgba(0,0,0,0.4),
+      inset 0 1px 2px rgba(255,255,255,0.6),
+      inset 0 -1px 2px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  /* corner screws */
+  .metal-plate::before,
+  .metal-plate::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 40%, #ddd, #999);
+    border: 1px solid #777;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+  }
+
+  .metal-plate::before {
+    top: 8px;
+    left: 8px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.3), 130px 0 0 0 #bbb, 130px 0 0 1px #777;
+  }
+
+  .metal-plate::after {
+    bottom: 8px;
+    left: 8px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.3), 130px 0 0 0 #bbb, 130px 0 0 1px #777;
+  }
+
+  .screw-tr, .screw-bl { display: none; }
+
+  /* red dome button */
+  #blow {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: none;
+    background:
+      radial-gradient(circle at 35% 30%, rgba(255,255,255,0.4) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, #ff4136 0%, #ff3b30 30%, #dd2a1f 60%, #aa1f15 85%, #881510 100%);
+    color: #fff;
+    font-family: Impact, 'Arial Black', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 900;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    position: relative;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.1s, box-shadow 0.1s;
+    box-shadow:
+      0 10px 0 #6b110c,
+      0 12px 20px rgba(0,0,0,0.5),
+      inset 0 -6px 12px rgba(0,0,0,0.3),
+      inset 0 3px 6px rgba(255,255,255,0.15);
+    text-shadow: 0 -2px 3px rgba(0,0,0,0.5);
+    line-height: 1.2;
+    z-index: 5;
+  }
+
+  /* pressed — sinks down */
+  #blow:active {
+    transform: translateY(8px);
+    box-shadow:
+      0 2px 0 #6b110c,
+      0 3px 8px rgba(0,0,0,0.4),
+      inset 0 -3px 8px rgba(0,0,0,0.3),
+      inset 0 3px 6px rgba(255,255,255,0.1);
+  }
+
+  #blow.on {
+    background:
+      radial-gradient(circle at 35% 30%, rgba(255,255,255,0.3) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, #666 0%, #555 30%, #444 60%, #333 85%, #222 100%);
+    box-shadow:
+      0 10px 0 #111,
+      0 12px 20px rgba(0,0,0,0.5),
+      inset 0 -6px 12px rgba(0,0,0,0.3),
+      inset 0 3px 6px rgba(255,255,255,0.1);
+    animation: pulse-glow 1s ease-in-out infinite;
+    font-size: 1rem;
+    letter-spacing: 2px;
+  }
+
+  #blow.on:active {
+    transform: translateY(8px);
+    box-shadow:
+      0 2px 0 #111,
+      0 3px 8px rgba(0,0,0,0.4),
+      inset 0 -3px 8px rgba(0,0,0,0.3);
+    animation: none;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 10px 0 #111, 0 12px 20px rgba(0,0,0,0.5), inset 0 -6px 12px rgba(0,0,0,0.3), inset 0 3px 6px rgba(255,255,255,0.1); }
+    50% { box-shadow: 0 10px 0 #111, 0 12px 30px rgba(255,59,48,0.4), inset 0 -6px 12px rgba(0,0,0,0.3), inset 0 3px 6px rgba(255,255,255,0.1); }
+  }
+
+  .ring-pulse {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 3px solid rgba(255,59,48,0.6);
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    opacity: 0;
+    animation: ring-expand 0.6s ease-out forwards;
+  }
+
+  @keyframes ring-expand {
+    0% { transform: scale(1); opacity: 0.7; }
+    100% { transform: scale(3.5); opacity: 0; }
+  }
+
+  /* --- SETTINGS GEAR --- */
+  .settings-toggle {
+    position: fixed;
+    bottom: 40px;
+    right: 14px;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid #888;
+    background: linear-gradient(to bottom, #e8e8e8, #c8c8c8 50%, #b8b8b8 50%, #aaa);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.5);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    color: #555;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+    -webkit-tap-highlight-color: transparent;
+    z-index: 100;
+  }
+
+  .settings-toggle:active {
+    background: linear-gradient(to bottom, #b8b8b8, #a8a8a8 50%, #999 50%, #888);
+  }
+
+  .settings-panel {
+    position: fixed;
+    bottom: 88px;
+    right: 14px;
+    background: linear-gradient(to bottom, #e8e8e8, #d4d4d4);
+    border: 1px solid #888;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.6);
+    padding: 14px 16px;
+    z-index: 100;
+    display: none;
+    min-width: 180px;
+  }
+
+  .settings-panel.open {
+    display: block;
+  }
+
+  .settings-panel h3 {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+    border-bottom: 1px solid #bbb;
+    padding-bottom: 6px;
+  }
+
+  .setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+  }
+
+  .setting-row + .setting-row {
+    border-top: 1px solid #ccc;
+  }
+
+  .setting-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #333;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+  }
+
+  /* iOS 6-style toggle switch */
+  .toggle-switch {
+    position: relative;
+    width: 50px;
+    height: 28px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(to bottom, #ccc, #e0e0e0);
+    border-radius: 14px;
+    border: 1px solid #999;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    transition: background 0.2s;
+  }
+
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    height: 24px;
+    width: 24px;
+    left: 1px;
+    bottom: 1px;
+    background: linear-gradient(to bottom, #fff, #e8e8e8);
+    border-radius: 50%;
+    border: 1px solid #aaa;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    transition: transform 0.2s;
+  }
+
+  .toggle-switch input:checked + .toggle-slider {
+    background: linear-gradient(to bottom, #5ab534, #4a9c2d);
+    border-color: #3a7a22;
+  }
+
+  .toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(22px);
+  }
+
+  .status {
+    font-size: 0.7rem;
+    color: #fff;
+    text-align: center;
+    line-height: 1.6;
+    font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.45);
+    padding: 8px 20px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  .footer {
+    position: fixed;
+    bottom: 12px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.55rem;
+    font-weight: 400;
+    color: #777;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+  }
+
+  .shake {
+    animation: shake 0.08s linear;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-3px) translateY(1px); }
+    75% { transform: translateX(3px) translateY(-1px); }
+  }
+</style>
+</head>
+<body>
+  <button class="settings-toggle" id="settingsBtn">⚙</button>
+  <div class="settings-panel" id="settingsPanel">
+    <h3>Sounds</h3>
+    <div class="setting-row">
+      <span class="setting-label">Message Ding</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggleNotif" checked>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label">Twitter</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggleTwitter" checked>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label">Apple Pay</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggleApplePay" checked>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="page" id="page-blow">
+    <div class="logo-bubble">
+      <h1 class="logo">TextBlower</h1>
+    </div>
+
+    <div class="counter" id="counter">0</div>
+
+    <div class="button-assembly">
+      <div class="hazard-base">
+        <div class="metal-plate">
+          <button id="blow">BLOW</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="status" id="status">tap to start blowing up your phone</p>
+  </div>
+
+  <p class="footer">Designed in Silver Lake</p>
+
+<script>
+const btn = document.getElementById('blow');
+const counterEl = document.getElementById('counter');
+const statusEl = document.getElementById('status');
+const settingsBtn = document.getElementById('settingsBtn');
+const settingsPanel = document.getElementById('settingsPanel');
+const toggleNotif = document.getElementById('toggleNotif');
+const toggleTwitter = document.getElementById('toggleTwitter');
+const toggleApplePay = document.getElementById('toggleApplePay');
+
+let blowing = false;
+let interval = null;
+let count = 0;
+let audioCtx = null;
+let startTime = 0;
+
+settingsBtn.addEventListener('click', () => {
+  settingsPanel.classList.toggle('open');
+});
+
+document.addEventListener('click', (e) => {
+  if (!settingsPanel.contains(e.target) && e.target !== settingsBtn) {
+    settingsPanel.classList.remove('open');
+  }
+});
+
+function ensureAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+const notifAudio = new Audio('notification.mp3');
+notifAudio.preload = 'auto';
+const applePayAudio = new Audio('applepay.mp3');
+applePayAudio.preload = 'auto';
+const twitterAudio = new Audio('twitter.mp3');
+twitterAudio.preload = 'auto';
+
+function playNotification() {
+  const clone = notifAudio.cloneNode();
+  clone.volume = 0.8;
+  clone.play().catch(() => {});
+}
+
+function playApplePay() {
+  const clone = applePayAudio.cloneNode();
+  clone.volume = 0.8;
+  clone.play().catch(() => {});
+}
+
+function playTwitter() {
+  const clone = twitterAudio.cloneNode();
+  clone.volume = 0.8;
+  clone.play().catch(() => {});
+}
+
+function playRandomSound() {
+  const available = [];
+  if (toggleNotif.checked) available.push({ fn: playNotification, weight: 75 });
+  if (toggleTwitter.checked) available.push({ fn: playTwitter, weight: 15 });
+  if (toggleApplePay.checked) available.push({ fn: playApplePay, weight: 10 });
+  if (available.length === 0) return;
+  const total = available.reduce((s, a) => s + a.weight, 0);
+  let r = Math.random() * total;
+  for (const a of available) {
+    r -= a.weight;
+    if (r <= 0) { a.fn(); return; }
+  }
+  available[available.length - 1].fn();
+}
+
+const names = [
+  'Mom', 'Dad', 'Alex', 'Jordan', 'Taylor', 'Sam', 'Chris', 'Jamie',
+  'Morgan', 'Casey', 'Riley', 'Avery', 'Quinn', 'Drew', 'Blake',
+  'Peyton', 'Skyler', 'Reese', 'Dakota', 'Bro', 'Coach', 'Boss',
+  'Bestie', 'Babe', 'Wifey', 'Hubby', 'Unknown Number', 'No Caller ID',
+  'Sarah', 'Mike', 'Jess', 'Tyler', 'Emma', 'Liam', 'Olivia', 'Noah',
+  'Ava', 'Marcus', 'Chloe', 'Ethan', 'Sophia', 'Mason', 'Isabella',
+  'Group Chat', 'The Boys', 'Family', 'Work Group', 'Squad'
+];
+
+const messages = [
+  'hey are you there??', 'omg call me NOW', 'did you see that?!',
+  'where are you???', 'yo respond', 'we need to talk ASAP',
+  'LMAOOO', 'check your email rn', 'are you coming tonight?',
+  'miss you!', 'sent you something important', 'this is urgent fr',
+  'haha no way', 'can you pick up?', 'running late sorry',
+  'what are you doing rn', 'come outside', 'I just heard omg',
+  'you won\'t believe this', 'party at mine?', 'bruh.',
+  'ANSWER YOUR PHONE', 'huge news!!!', 'lunch?',
+  'can I borrow your car', 'look at this pic lol', '???',
+  'I\'m here', 'where\'d you go', 'SOS', 'lol what',
+  'nvm figured it out', 'wait actually no', 'help me pick an outfit',
+  'yo yo yo', 'wya??', 'open the door', 'i see you online',
+  'why are you ignoring me', 'this can\'t wait', 'EMERGENCY',
+  'hahahaha stop', 'sent you $50', 'you free?', 'let\'s go',
+  'dude.', 'read this thread', 'i\'m outside', 'pick up pick up',
+  'I told you so', 'what happened??', 'you good?', 'call me back',
+  'new plan', 'change of plans', 'don\'t forget', 'HURRY',
+  'lmk asap', 'r u alive??', 'bet', 'say less', 'on my way'
+];
+
+function randomItem(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function sendNotification() {
+  if (Notification.permission === 'granted') {
+    const n = new Notification(randomItem(names), {
+      body: randomItem(messages),
+      tag: 'tb-' + Date.now() + '-' + Math.random(),
+      renotify: true,
+      silent: true
+    });
+    setTimeout(() => n.close(), 4000);
+  }
+}
+
+function fireOne() {
+  count++;
+  counterEl.textContent = count;
+  document.body.classList.remove('shake');
+  void document.body.offsetWidth;
+  document.body.classList.add('shake');
+  playRandomSound();
+  sendNotification();
+  const ring = document.createElement('span');
+  ring.className = 'ring-pulse';
+  btn.appendChild(ring);
+  ring.addEventListener('animationend', () => ring.remove());
+}
+
+function scheduleNext() {
+  if (!blowing) return;
+  const elapsed = (Date.now() - startTime) / 1000;
+  const ramp = Math.min(elapsed / 8, 1);
+  const r = Math.random();
+  let delay;
+  if (r < 0.45) delay = 50 + Math.random() * 120;
+  else if (r < 0.85) delay = 180 + Math.random() * 350;
+  else delay = 400 + Math.random() * 500;
+  delay = delay * (1 + 4 * (1 - ramp));
+  interval = setTimeout(() => {
+    fireOne();
+    scheduleNext();
+  }, delay);
+}
+
+function startBlowing() {
+  blowing = true;
+  btn.classList.add('on');
+  btn.firstChild.textContent = 'STOP\nBLOWING';
+  counterEl.classList.add('active');
+  statusEl.textContent = 'blowing up...';
+  startTime = Date.now();
+  fireOne();
+  scheduleNext();
+}
+
+function stopBlowing() {
+  blowing = false;
+  btn.classList.remove('on');
+  btn.firstChild.textContent = 'BLOW';
+  counterEl.classList.remove('active');
+  statusEl.textContent = count + ' notifications. tap to go again';
+  clearTimeout(interval);
+  interval = null;
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+
+btn.addEventListener('click', () => {
+  if (!blowing) {
+    ensureAudio();
+    if (Notification.permission === 'default') {
+      Notification.requestPermission().then(() => startBlowing());
+    } else {
+      startBlowing();
+    }
+  } else {
+    stopBlowing();
+  }
+});
+</script>
+</body>
+</html>
