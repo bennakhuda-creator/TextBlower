@@ -1,4 +1,4 @@
-const CACHE = 'textblower-v2';
+const CACHE = 'textblower-v3';
 const ASSETS = [
   '/',
   '/index.html',
@@ -7,6 +7,7 @@ const ASSETS = [
   '/twitter.mp3',
   '/snapchat.mp3',
   '/grindr.mp3',
+  '/ahh.mp3',
   '/diamondplate.svg',
   '/icon-192.png',
   '/icon-512.png'

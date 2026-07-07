@@ -509,6 +509,13 @@
         <span class="toggle-slider"></span>
       </label>
     </div>
+    <div class="setting-row">
+      <span class="setting-label">Ahh</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggleAhh" checked>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
   </div>
 
   <div class="page" id="page-blow">
@@ -540,6 +547,7 @@ const toggleTwitter = document.getElementById('toggleTwitter');
 const toggleApplePay = document.getElementById('toggleApplePay');
 const toggleSnapchat = document.getElementById('toggleSnapchat');
 const toggleGrindr = document.getElementById('toggleGrindr');
+const toggleAhh = document.getElementById('toggleAhh');
 
 let blowing = false;
 let interval = null;
@@ -575,6 +583,8 @@ const snapchatAudio = new Audio('snapchat.mp3');
 snapchatAudio.preload = 'auto';
 const grindrAudio = new Audio('grindr.mp3');
 grindrAudio.preload = 'auto';
+const ahhAudio = new Audio('ahh.mp3');
+ahhAudio.preload = 'auto';
 
 function playNotification() {
   const clone = notifAudio.cloneNode();
@@ -606,6 +616,12 @@ function playGrindr() {
   clone.play().catch(() => {});
 }
 
+function playAhh() {
+  const clone = ahhAudio.cloneNode();
+  clone.volume = 0.8;
+  clone.play().catch(() => {});
+}
+
 function playRandomSound() {
   const available = [];
   if (toggleNotif.checked) available.push({ fn: playNotification, weight: 50 });
@@ -613,6 +629,7 @@ function playRandomSound() {
   if (toggleApplePay.checked) available.push({ fn: playApplePay, weight: 10 });
   if (toggleSnapchat.checked) available.push({ fn: playSnapchat, weight: 15 });
   if (toggleGrindr.checked) available.push({ fn: playGrindr, weight: 10 });
+  if (toggleAhh.checked) available.push({ fn: playAhh, weight: 10 });
   if (available.length === 0) return;
   const total = available.reduce((s, a) => s + a.weight, 0);
   let r = Math.random() * total;
