@@ -1,4 +1,4 @@
-const CACHE = 'textblower-v7';
+const CACHE = 'textblower-v8';
 const ASSETS = [
   '/',
   '/index.html',

@@ -328,8 +328,8 @@
     position: fixed;
     bottom: 40px;
     right: 14px;
-    width: 40px;
     height: 40px;
+    padding: 0 14px;
     border-radius: 8px;
     border: 1px solid #888;
     background: linear-gradient(to bottom, #e8e8e8, #c8c8c8 50%, #b8b8b8 50%, #aaa);
@@ -338,7 +338,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.4rem;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
     color: #555;
     text-shadow: 0 1px 0 rgba(255,255,255,0.4);
     -webkit-tap-highlight-color: transparent;
@@ -505,7 +507,7 @@
 </style>
 </head>
 <body>
-  <button class="settings-toggle" id="settingsBtn">⚙</button>
+  <button class="settings-toggle" id="settingsBtn">🔊 Sounds</button>
   <div class="settings-panel" id="settingsPanel">
     <h3>🔊 Sounds</h3>
     <div class="setting-row">
